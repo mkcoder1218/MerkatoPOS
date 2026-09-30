@@ -8,11 +8,12 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   roles             UserRole[]
   branches          UserBranch[]
   sessions          Session[]
-  devicesRegistered Device[]     @relation("DeviceRegisteredBy")
+  devicesRegistered Device[]        @relation("DeviceRegisteredBy")
+  stockMovements    StockMovement[]
 
   @@unique([tenantId, email])
   @@index([tenantId])

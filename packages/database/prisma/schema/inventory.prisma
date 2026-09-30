@@ -1,0 +1,57 @@
+enum StockMovementType {
+  PURCHASE
+  SALE
+  WASTE
+  PRODUCTION
+  TRANSFER_OUT
+  TRANSFER_IN
+  ADJUSTMENT
+  RETURN
+}
+
+model InventoryItem {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  branchId           String
+  productId          String
+  unitId             String
+  currentQuantity    Decimal  @default(0) @db.Decimal(18, 6)
+  allowNegativeStock Boolean  @default(false)
+  version            Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch    Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unit      Unit            @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  movements StockMovement[]
+
+  @@unique([tenantId, branchId, productId])
+  @@index([tenantId, branchId])
+  @@map("inventory_items")
+}
+
+model StockMovement {
+  id              String            @id @default(cuid())
+  tenantId        String
+  branchId        String
+  inventoryItemId String
+  createdById     String
+  type            StockMovementType
+  quantityDelta   Decimal           @db.Decimal(18, 6)
+  quantityAfter   Decimal           @db.Decimal(18, 6)
+  referenceType   String?
+  referenceId     String?
+  note            String?
+  createdAt       DateTime          @default(now())
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch        Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Restrict)
+  createdBy     User          @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, branchId, createdAt])
+  @@index([inventoryItemId, createdAt])
+  @@map("stock_movements")
+}

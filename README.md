@@ -7,25 +7,24 @@ Configurable multi-tenant POS and business-management platform.
 - `apps/web` — Next.js web application
 - `apps/api` — NestJS REST API
 - `packages/database` — Prisma/PostgreSQL integration
-- `packages/shared` — shared auth and permission contracts
+- `packages/shared` — shared contracts, permissions, and decimal-safe domain math
 
-## Implemented foundation
+## Implemented platform foundation
 
-- tenant-aware authentication
-- rotating refresh-token sessions
-- logout/session revocation
-- current-user endpoint
-- password change and admin reset
-- tenant management
-- branch management
-- user management and branch/role assignment
-- permission catalog
-- custom roles and permission assignment
-- device registration, lifecycle, and heartbeat
-- POS register management and device linking
-- tenant/branch isolation checks
-- first PostgreSQL migration
-- focused security regression tests
+- tenant-aware authentication and rotating sessions
+- branches, users, roles, permissions
+- devices and POS registers
+- categories and POS visibility
+- custom units and unit conversions
+- inclusive/exclusive tax profiles
+- products with SKU/barcode, branch availability, and branch price overrides
+- modifier groups/options and product attachment
+- timed percentage discounts
+- branch-scoped inventory items
+- auditable stock-movement ledger
+- negative-stock rules
+- optimistic inventory concurrency protection
+- decimal-safe tax and quantity calculations
 
 ## Local setup
 
@@ -49,32 +48,25 @@ pnpm validate
 
 This runs Prisma validation, TypeScript typechecking, linting, tests, and builds.
 
-## API base
+## Catalog and inventory API
 
-`http://localhost:3001/api/v1`
-
-Core routes:
-
-- `GET /health`
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `POST /auth/logout`
-- `GET /auth/me`
-- `POST /auth/change-password`
-- `GET|PATCH /tenants/current`
-- `GET|POST /branches`
-- `PATCH /branches/:branchId`
-- `GET|POST /users`
-- `PATCH /users/:userId`
-- `POST /users/:userId/reset-password`
-- `GET|POST /roles`
-- `PATCH|DELETE /roles/:roleId`
-- `GET /permissions`
-- `GET /devices`
-- `POST /devices/register`
-- `PATCH /devices/:deviceId`
-- `POST /devices/:deviceId/heartbeat`
-- `GET|POST /registers`
-- `PATCH /registers/:registerId`
+- `GET|POST /api/v1/categories`
+- `PATCH /api/v1/categories/:categoryId`
+- `GET|POST /api/v1/units`
+- `PATCH /api/v1/units/:unitId`
+- `GET|POST /api/v1/units/conversions`
+- `GET|POST /api/v1/taxes`
+- `PATCH /api/v1/taxes/:taxProfileId`
+- `GET|POST /api/v1/products`
+- `PATCH /api/v1/products/:productId`
+- `GET|POST /api/v1/modifiers/groups`
+- `PATCH /api/v1/modifiers/groups/:groupId`
+- `POST /api/v1/modifiers/groups/:groupId/options`
+- `PATCH /api/v1/modifiers/options/:optionId`
+- `PUT /api/v1/modifiers/products/:productId/groups`
+- `GET|POST /api/v1/discounts`
+- `PATCH /api/v1/discounts/:discountId`
+- `GET|POST /api/v1/inventory`
+- `GET|POST /api/v1/inventory/:itemId/movements`
 
 See `DEVELOPMENT_INSTRUCTIONS.md` and `CODING_RULES.md` before architectural changes.

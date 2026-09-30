@@ -1,0 +1,19 @@
+model ProductDiscount {
+  id         String   @id @default(cuid())
+  tenantId   String
+  productId  String
+  name       String
+  percentage Decimal  @db.Decimal(5, 2)
+  startsAt   DateTime?
+  endsAt     DateTime?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, productId])
+  @@index([startsAt, endsAt])
+  @@map("product_discounts")
+}

@@ -6,11 +6,21 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  branches  Branch[]
-  users     User[]
-  roles     Role[]
-  devices   Device[]
-  registers Register[]
+  branches          Branch[]
+  users             User[]
+  roles             Role[]
+  devices           Device[]
+  registers         Register[]
+  categories        Category[]
+  units             Unit[]
+  unitConversions   UnitConversion[]
+  taxProfiles       TaxProfile[]
+  products          Product[]
+  modifierGroups    ModifierGroup[]
+  modifierOptions   ModifierOption[]
+  productDiscounts  ProductDiscount[]
+  inventoryItems    InventoryItem[]
+  stockMovements    StockMovement[]
 
   @@map("tenants")
 }
@@ -24,10 +34,13 @@ model Branch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  userBranches UserBranch[]
-  devices      Device[]
-  registers    Register[]
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  userBranches   UserBranch[]
+  devices        Device[]
+  registers      Register[]
+  products       ProductBranch[]
+  inventoryItems InventoryItem[]
+  stockMovements StockMovement[]
 
   @@unique([tenantId, name])
   @@unique([tenantId, code])
