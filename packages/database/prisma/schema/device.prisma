@@ -1,0 +1,55 @@
+enum DevicePlatform {
+  WEB
+  MOBILE
+  DESKTOP
+}
+
+enum DeviceStatus {
+  ACTIVE
+  SUSPENDED
+  RETIRED
+}
+
+model Device {
+  id             String         @id @default(cuid())
+  tenantId       String
+  branchId       String
+  registeredById String
+  deviceUid      String
+  name           String
+  platform       DevicePlatform
+  appVersion     String?
+  status         DeviceStatus   @default(ACTIVE)
+  lastSeenAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  branch       Branch     @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  registeredBy User       @relation("DeviceRegisteredBy", fields: [registeredById], references: [id], onDelete: Restrict)
+  registers    Register[]
+
+  @@unique([tenantId, deviceUid])
+  @@index([tenantId, branchId])
+  @@map("devices")
+}
+
+model Register {
+  id        String   @id @default(cuid())
+  tenantId  String
+  branchId  String
+  deviceId  String?
+  name      String
+  code      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, code])
+  @@index([tenantId, branchId])
+  @@map("registers")
+}

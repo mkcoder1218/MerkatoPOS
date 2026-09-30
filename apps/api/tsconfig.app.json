@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "../../dist/apps/api",
+    "rootDir": "../..",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "isolatedModules": false,
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../packages/database/src/**/*.ts",
+    "../../packages/shared/src/**/*.ts"
+  ],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+}
