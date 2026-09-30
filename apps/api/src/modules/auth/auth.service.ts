@@ -20,7 +20,7 @@ export class AuthService {
     dto: LoginDto,
     metadata: { userAgent?: string; ipAddress?: string },
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const user = await this.repository.findLoginUser(dto.tenantSlug, dto.email.toLowerCase());
+    const user = await this.repository.findLoginUser(dto.tenantSlug, dto.username.toLowerCase());
 
     if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
       throw new UnauthorizedException('Invalid credentials');
@@ -83,6 +83,7 @@ export class AuthService {
       id: current.id,
       tenantId: current.tenantId,
       name: current.name,
+      username: current.username,
       email: current.email,
       branchIds: current.branches.map(({ branchId }) => branchId),
       permissions: this.extractPermissions(current.roles),
@@ -117,6 +118,7 @@ export class AuthService {
       sub: user.id,
       userId: user.id,
       tenantId: user.tenantId,
+      username: user.username,
       email: user.email,
       sessionId,
       branchIds: user.branches.map(({ branchId }) => branchId),

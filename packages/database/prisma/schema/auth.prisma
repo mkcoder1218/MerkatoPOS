@@ -2,25 +2,27 @@ model User {
   id           String   @id @default(cuid())
   tenantId     String
   name         String
+  username     String
   email        String
   passwordHash String
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenant            Tenant           @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   roles             UserRole[]
   branches          UserBranch[]
   sessions          Session[]
-  devicesRegistered Device[]        @relation("DeviceRegisteredBy")
+  devicesRegistered Device[]         @relation("DeviceRegisteredBy")
   stockMovements    StockMovement[]
   shifts            Shift[]
   orders            Order[]
   salesCompleted    SaleCompletion[] @relation("SaleCompletedBy")
   voidRequests      VoidRequest[]    @relation("VoidRequestedBy")
   voidApprovals     VoidRequest[]    @relation("VoidApprovedBy")
-  printJobsRequested PrintJob[]       @relation("PrintRequestedBy")
+  printJobsRequested PrintJob[]      @relation("PrintRequestedBy")
 
+  @@unique([tenantId, username])
   @@unique([tenantId, email])
   @@index([tenantId])
   @@map("users")
