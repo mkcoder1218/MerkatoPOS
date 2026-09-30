@@ -5,6 +5,9 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 
+const TENANT_SLUG =
+  process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'local-demo';
+
 type Session = {
   accessToken: string;
   refreshToken: string;
@@ -243,7 +246,7 @@ export function PosApp() {
       const nextSession = await request<Session>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({
-          tenantSlug: String(data.get('tenantSlug') ?? '').trim().toLowerCase(),
+          tenantSlug: TENANT_SLUG,
           email: String(data.get('email') ?? '').trim(),
           password: String(data.get('password') ?? ''),
         }),
@@ -333,17 +336,13 @@ export function PosApp() {
       <main className="login-shell">
         <section className="login-panel">
           <div className="brand-mark">M</div>
-          <p className="eyebrow">MerkatoPOS</p>
+          <p className="eyebrow brand-eyebrow">MerkatoPOS</p>
           <h1>Run the counter, not the software.</h1>
           <p className="muted">
-            Sign in to your business workspace to start selling.
+            Sign in to start selling.
           </p>
 
           <form className="login-form" onSubmit={login}>
-            <label>
-              Business slug
-              <input name="tenantSlug" placeholder="my-business" required />
-            </label>
             <label>
               Email
               <input name="email" type="email" placeholder="you@business.com" required />
