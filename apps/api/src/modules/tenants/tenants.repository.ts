@@ -11,4 +11,12 @@ export class TenantsRepository {
       select: { id: true, name: true, slug: true, isActive: true, createdAt: true },
     });
   }
+
+  update(id: string, data: { name?: string }) {
+    return this.prisma.tenant.update({
+      where: { id },
+      data,
+      select: { id: true, name: true, slug: true, isActive: true, createdAt: true },
+    });
+  }
 }

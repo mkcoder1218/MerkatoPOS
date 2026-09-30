@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@merkatopos/database';
-import type { DevicePlatform } from '@prisma/client';
+import type { DevicePlatform, DeviceStatus } from '@prisma/client';
 
 interface RegisterDeviceRecord {
   tenantId: string;
@@ -19,15 +19,9 @@ export class DevicesRepository {
   register(input: RegisterDeviceRecord) {
     return this.prisma.device.upsert({
       where: {
-        tenantId_deviceUid: {
-          tenantId: input.tenantId,
-          deviceUid: input.deviceUid,
-        },
+        tenantId_deviceUid: { tenantId: input.tenantId, deviceUid: input.deviceUid },
       },
-      create: {
-        ...input,
-        lastSeenAt: new Date(),
-      },
+      create: { ...input, lastSeenAt: new Date() },
       update: {
         branchId: input.branchId,
         name: input.name,
@@ -36,18 +30,6 @@ export class DevicesRepository {
         status: 'ACTIVE',
         lastSeenAt: new Date(),
       },
-      select: {
-        id: true,
-        branchId: true,
-        deviceUid: true,
-        name: true,
-        platform: true,
-        appVersion: true,
-        status: true,
-        lastSeenAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
   }
 
@@ -55,17 +37,30 @@ export class DevicesRepository {
     return this.prisma.device.findMany({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        branchId: true,
-        deviceUid: true,
-        name: true,
-        platform: true,
-        appVersion: true,
-        status: true,
-        lastSeenAt: true,
-        createdAt: true,
-        updatedAt: true,
+    });
+  }
+
+  findForTenant(tenantId: string, deviceId: string) {
+    return this.prisma.device.findFirst({ where: { id: deviceId, tenantId } });
+  }
+
+  update(
+    tenantId: string,
+    deviceId: string,
+    data: { name?: string; branchId?: string; status?: DeviceStatus },
+  ) {
+    return this.prisma.device.updateMany({
+      where: { id: deviceId, tenantId },
+      data,
+    });
+  }
+
+  heartbeat(tenantId: string, deviceId: string, appVersion?: string) {
+    return this.prisma.device.updateMany({
+      where: { id: deviceId, tenantId, status: 'ACTIVE' },
+      data: {
+        lastSeenAt: new Date(),
+        ...(appVersion !== undefined ? { appVersion } : {}),
       },
     });
   }

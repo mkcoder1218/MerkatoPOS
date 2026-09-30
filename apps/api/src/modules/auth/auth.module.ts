@@ -18,9 +18,14 @@ import { PermissionsGuard } from './permissions.guard';
           throw new Error('JWT_ACCESS_SECRET is required');
         }
 
+        const expiresIn = Number(config.get<string>('JWT_ACCESS_EXPIRES_IN_SECONDS') ?? '900');
+        if (!Number.isFinite(expiresIn) || expiresIn <= 0) {
+          throw new Error('JWT_ACCESS_EXPIRES_IN_SECONDS must be a positive number');
+        }
+
         return {
           secret,
-          signOptions: { expiresIn: '15m' },
+          signOptions: { expiresIn },
         };
       },
     }),
@@ -32,5 +37,6 @@ import { PermissionsGuard } from './permissions.guard';
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

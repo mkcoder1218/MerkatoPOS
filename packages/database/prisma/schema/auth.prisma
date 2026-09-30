@@ -11,11 +11,30 @@ model User {
   tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   roles             UserRole[]
   branches          UserBranch[]
+  sessions          Session[]
   devicesRegistered Device[]     @relation("DeviceRegisteredBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
   @@map("users")
+}
+
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  lastUsedAt       DateTime  @default(now())
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
 }
 
 model Role {

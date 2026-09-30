@@ -9,14 +9,29 @@ export class BranchesRepository {
     return this.prisma.branch.findMany({
       where: { tenantId },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, code: true, isActive: true, createdAt: true },
     });
   }
 
   findForTenant(tenantId: string, branchId: string) {
     return this.prisma.branch.findFirst({
-      where: { id: branchId, tenantId, isActive: true },
-      select: { id: true },
+      where: { id: branchId, tenantId },
+    });
+  }
+
+  create(tenantId: string, data: { name: string; code?: string }) {
+    return this.prisma.branch.create({
+      data: { tenantId, name: data.name, ...(data.code ? { code: data.code } : {}) },
+    });
+  }
+
+  update(
+    tenantId: string,
+    branchId: string,
+    data: { name?: string; code?: string; isActive?: boolean },
+  ) {
+    return this.prisma.branch.updateMany({
+      where: { id: branchId, tenantId },
+      data,
     });
   }
 }
