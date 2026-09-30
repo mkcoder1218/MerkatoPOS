@@ -3,6 +3,7 @@ import {
   IsArray,
   IsEmail,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -12,6 +13,12 @@ export class CreateUserDto {
   @MinLength(2)
   @MaxLength(100)
   name!: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  @Matches(/^[a-zA-Z0-9._-]+$/)
+  username!: string;
 
   @IsEmail()
   email!: string;

@@ -2,6 +2,7 @@ import type { AuthContext } from '@merkatopos/shared';
 
 export interface JwtPayload extends AuthContext {
   sub: string;
+  username?: string;
   email: string;
   sessionId: string;
 }

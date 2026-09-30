@@ -17,6 +17,7 @@ async function main(): Promise<void> {
   const tenantSlug = required('SEED_TENANT_SLUG');
   const branchName = required('SEED_BRANCH_NAME');
   const adminName = required('SEED_ADMIN_NAME');
+  const adminUsername = required('SEED_ADMIN_USERNAME').toLowerCase();
   const adminEmail = required('SEED_ADMIN_EMAIL').toLowerCase();
   const adminPassword = required('SEED_ADMIN_PASSWORD');
 
@@ -55,8 +56,20 @@ async function main(): Promise<void> {
   const passwordHash = await bcrypt.hash(adminPassword, 12);
   const user = await prisma.user.upsert({
     where: { tenantId_email: { tenantId: tenant.id, email: adminEmail } },
-    create: { tenantId: tenant.id, name: adminName, email: adminEmail, passwordHash },
-    update: { name: adminName, passwordHash, isActive: true },
+    create: {
+      tenantId: tenant.id,
+      name: adminName,
+      username: adminUsername,
+      email: adminEmail,
+      passwordHash,
+    },
+    update: {
+      name: adminName,
+      username: adminUsername,
+      email: adminEmail,
+      passwordHash,
+      isActive: true,
+    },
   });
 
   await prisma.userRole.upsert({

@@ -12,6 +12,7 @@ export class UsersRepository {
       select: {
         id: true,
         name: true,
+        username: true,
         email: true,
         isActive: true,
         createdAt: true,
@@ -42,6 +43,7 @@ export class UsersRepository {
   create(input: {
     tenantId: string;
     name: string;
+    username: string;
     email: string;
     passwordHash: string;
     branchIds: string[];
@@ -51,6 +53,7 @@ export class UsersRepository {
       data: {
         tenantId: input.tenantId,
         name: input.name,
+        username: input.username,
         email: input.email,
         passwordHash: input.passwordHash,
         branches: {
@@ -60,7 +63,7 @@ export class UsersRepository {
           create: input.roleIds.map((roleId) => ({ roleId })),
         },
       },
-      select: { id: true, name: true, email: true, isActive: true },
+      select: { id: true, name: true, username: true, email: true, isActive: true },
     });
   }
 
@@ -69,6 +72,7 @@ export class UsersRepository {
     userId: string,
     input: {
       name?: string;
+      username?: string;
       email?: string;
       isActive?: boolean;
       branchIds?: string[];
@@ -82,6 +86,7 @@ export class UsersRepository {
         where: { id: user.id },
         data: {
           ...(input.name !== undefined ? { name: input.name } : {}),
+          ...(input.username !== undefined ? { username: input.username } : {}),
           ...(input.email !== undefined ? { email: input.email } : {}),
           ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
         },
@@ -105,7 +110,7 @@ export class UsersRepository {
 
       return tx.user.findUnique({
         where: { id: userId },
-        select: { id: true, name: true, email: true, isActive: true },
+        select: { id: true, name: true, username: true, email: true, isActive: true },
       });
     });
   }

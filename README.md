@@ -39,10 +39,11 @@ pnpm dev
 
 `pnpm setup:local` creates an untracked local `.env` only when one does not already exist. It generates a random JWT secret and local demo seed credentials.
 
-Default local demo login created by the setup command:
+Default local demo login created by the setup command (authentication uses username):
 
 - tenant slug: `local-demo`
-- email: `admin@local.test`
+- username: `admin`
+- email/contact: `admin@local.test`
 - password: `ChangeMe123!`
 
 These credentials are for local development only. Change them before using a shared or deployed environment.

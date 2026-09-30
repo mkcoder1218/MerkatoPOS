@@ -17,6 +17,7 @@ type Me = {
   id: string;
   tenantId: string;
   name: string;
+  username: string;
   email: string;
   branchIds: string[];
   permissions: string[];
@@ -247,7 +248,7 @@ export function PosApp() {
         method: 'POST',
         body: JSON.stringify({
           tenantSlug: TENANT_SLUG,
-          email: String(data.get('email') ?? '').trim(),
+          username: String(data.get('username') ?? '').trim().toLowerCase(),
           password: String(data.get('password') ?? ''),
         }),
       });
@@ -344,8 +345,14 @@ export function PosApp() {
 
           <form className="login-form" onSubmit={login}>
             <label>
-              Email
-              <input name="email" type="email" placeholder="you@business.com" required />
+              Username
+              <input
+                name="username"
+                autoComplete="username"
+                placeholder="admin"
+                minLength={2}
+                required
+              />
             </label>
             <label>
               Password
@@ -384,7 +391,7 @@ export function PosApp() {
           <div className="avatar">{me?.name?.slice(0, 1).toUpperCase() || 'U'}</div>
           <div>
             <strong>{me?.name ?? 'User'}</strong>
-            <span>{me?.email ?? ''}</span>
+            <span>@{me?.username ?? ''}</span>
           </div>
           <button className="icon-button" onClick={logout} title="Sign out">↗</button>
         </div>

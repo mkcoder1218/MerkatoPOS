@@ -5,16 +5,17 @@ import { PrismaService } from '@merkatopos/database';
 export class AuthRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findLoginUser(tenantSlug: string, email: string) {
+  findLoginUser(tenantSlug: string, username: string) {
     return this.prisma.user.findFirst({
       where: {
-        email,
+        username,
         isActive: true,
         tenant: { slug: tenantSlug, isActive: true },
       },
       select: {
         id: true,
         tenantId: true,
+        username: true,
         email: true,
         passwordHash: true,
       },

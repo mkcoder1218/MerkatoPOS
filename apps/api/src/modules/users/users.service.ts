@@ -20,6 +20,7 @@ export class UsersService {
     return this.repository.create({
       tenantId,
       name: dto.name.trim(),
+      username: dto.username.trim().toLowerCase(),
       email: dto.email.toLowerCase(),
       passwordHash,
       branchIds: [...new Set(dto.branchIds)],
@@ -45,13 +46,19 @@ export class UsersService {
 
     const result = await this.repository.update(tenantId, userId, {
       ...(dto.name !== undefined ? { name: dto.name.trim() } : {}),
+      ...(dto.username !== undefined ? { username: dto.username.trim().toLowerCase() } : {}),
       ...(dto.email !== undefined ? { email: dto.email.toLowerCase() } : {}),
       ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
       ...(dto.branchIds !== undefined ? { branchIds: [...new Set(dto.branchIds)] } : {}),
       ...(dto.roleIds !== undefined ? { roleIds: [...new Set(dto.roleIds)] } : {}),
     });
 
-    if (dto.isActive === false || dto.branchIds !== undefined || dto.roleIds !== undefined) {
+    if (
+      dto.isActive === false ||
+      dto.username !== undefined ||
+      dto.branchIds !== undefined ||
+      dto.roleIds !== undefined
+    ) {
       await this.repository.revokeSessions(userId);
     }
 
