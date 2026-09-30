@@ -9,22 +9,24 @@ Configurable multi-tenant POS and business-management platform.
 - `packages/database` — Prisma/PostgreSQL integration
 - `packages/shared` — shared contracts, permissions, and decimal-safe domain math
 
-## Implemented platform foundation
+## Implemented foundation
 
 - tenant-aware authentication and rotating sessions
 - branches, users, roles, permissions
 - devices and POS registers
-- categories and POS visibility
-- custom units and unit conversions
-- inclusive/exclusive tax profiles
-- products with SKU/barcode, branch availability, and branch price overrides
-- modifier groups/options and product attachment
-- timed percentage discounts
-- branch-scoped inventory items
-- auditable stock-movement ledger
-- negative-stock rules
-- optimistic inventory concurrency protection
-- decimal-safe tax and quantity calculations
+- categories, units, tax profiles, products, modifiers, discounts
+- branch-scoped inventory and auditable stock movements
+- configurable POS settings
+- shift opening/closing with cash reconciliation
+- optional branch tables with occupancy derived from open orders
+- server-side POS pricing snapshots
+- dine-in, takeaway, pickup, and delivery orders
+- CASH, Bank Transfer, Telebirr, and Chapa payments
+- idempotent atomic sale finalization
+- inventory deduction during checkout
+- receipt numbering
+- permission-based void request/approval
+- void stock reversal and payment reversal
 
 ## Local setup
 
@@ -46,27 +48,22 @@ Set a strong `JWT_ACCESS_SECRET` and all `SEED_*` values before seeding.
 pnpm validate
 ```
 
-This runs Prisma validation, TypeScript typechecking, linting, tests, and builds.
+This generates Prisma Client and runs Prisma validation, TypeScript typechecking, linting, tests, and builds.
 
-## Catalog and inventory API
+## Selling workflow API
 
-- `GET|POST /api/v1/categories`
-- `PATCH /api/v1/categories/:categoryId`
-- `GET|POST /api/v1/units`
-- `PATCH /api/v1/units/:unitId`
-- `GET|POST /api/v1/units/conversions`
-- `GET|POST /api/v1/taxes`
-- `PATCH /api/v1/taxes/:taxProfileId`
-- `GET|POST /api/v1/products`
-- `PATCH /api/v1/products/:productId`
-- `GET|POST /api/v1/modifiers/groups`
-- `PATCH /api/v1/modifiers/groups/:groupId`
-- `POST /api/v1/modifiers/groups/:groupId/options`
-- `PATCH /api/v1/modifiers/options/:optionId`
-- `PUT /api/v1/modifiers/products/:productId/groups`
-- `GET|POST /api/v1/discounts`
-- `PATCH /api/v1/discounts/:discountId`
-- `GET|POST /api/v1/inventory`
-- `GET|POST /api/v1/inventory/:itemId/movements`
+- `GET|PATCH /api/v1/pos-settings`
+- `GET /api/v1/shifts`
+- `POST /api/v1/shifts/open`
+- `POST /api/v1/shifts/:shiftId/close`
+- `GET|POST /api/v1/tables`
+- `PATCH /api/v1/tables/:tableId`
+- `GET|POST /api/v1/orders`
+- `GET|PATCH /api/v1/orders/:orderId`
+- `POST /api/v1/orders/:orderId/complete`
+- `POST /api/v1/orders/:orderId/void-request`
+- `POST /api/v1/orders/:orderId/void-approve`
+- `POST /api/v1/orders/:orderId/void-reject`
+- `GET /api/v1/payments`
 
 See `DEVELOPMENT_INSTRUCTIONS.md` and `CODING_RULES.md` before architectural changes.

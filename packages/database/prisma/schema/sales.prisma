@@ -1,0 +1,238 @@
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+  PICKUP
+  DELIVERY
+}
+
+enum OrderStatus {
+  DRAFT
+  OPEN
+  COMPLETED
+  VOID_PENDING
+  VOIDED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  TELEBIRR
+  CHAPA
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum VoidRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PosSettings {
+  tenantId           String  @id
+  requireActiveShift Boolean @default(true)
+  tablesEnabled      Boolean @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("pos_settings")
+}
+
+model Shift {
+  id              String      @id @default(cuid())
+  tenantId        String
+  branchId        String
+  registerId      String
+  userId          String
+  status          ShiftStatus @default(OPEN)
+  openingCash     Decimal     @default(0) @db.Decimal(18, 2)
+  expectedCash    Decimal?    @db.Decimal(18, 2)
+  countedCash     Decimal?    @db.Decimal(18, 2)
+  discrepancy     Decimal?    @db.Decimal(18, 2)
+  openedAt        DateTime    @default(now())
+  closedAt        DateTime?
+  closingNote     String?
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  branch   Branch   @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  register Register @relation(fields: [registerId], references: [id], onDelete: Restrict)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orders   Order[]
+
+  @@index([tenantId, branchId, status])
+  @@index([registerId, status])
+  @@index([userId, status])
+  @@map("shifts")
+}
+
+model DiningTable {
+  id        String   @id @default(cuid())
+  tenantId  String
+  branchId  String
+  name      String
+  code      String
+  capacity  Int?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@unique([tenantId, branchId, code])
+  @@index([tenantId, branchId])
+  @@map("dining_tables")
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  tenantId          String
+  branchId          String
+  registerId        String
+  shiftId           String?
+  userId            String
+  tableId           String?
+  orderNumber       String
+  type              OrderType
+  status            OrderStatus @default(DRAFT)
+  subtotal          Decimal     @default(0) @db.Decimal(18, 2)
+  discountTotal     Decimal     @default(0) @db.Decimal(18, 2)
+  taxTotal          Decimal     @default(0) @db.Decimal(18, 2)
+  grandTotal        Decimal     @default(0) @db.Decimal(18, 2)
+  completedAt       DateTime?
+  voidedAt          DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  branch      Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  register    Register     @relation(fields: [registerId], references: [id], onDelete: Restrict)
+  shift       Shift?       @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  table       DiningTable? @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  items       OrderItem[]
+  payments    Payment[]
+  completion  SaleCompletion?
+  voidRequest VoidRequest?
+
+  @@unique([tenantId, orderNumber])
+  @@index([tenantId, branchId, status, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  productId           String
+  productName         String
+  skuSnapshot         String?
+  unitId              String
+  unitSymbol          String
+  quantity            Decimal  @db.Decimal(18, 6)
+  unitPrice           Decimal  @db.Decimal(18, 2)
+  modifierTotal       Decimal  @default(0) @db.Decimal(18, 2)
+  discountPercentage  Decimal  @default(0) @db.Decimal(5, 2)
+  discountAmount      Decimal  @default(0) @db.Decimal(18, 2)
+  taxPercentage       Decimal  @default(0) @db.Decimal(5, 2)
+  taxMode             TaxMode?
+  taxAmount           Decimal  @default(0) @db.Decimal(18, 2)
+  lineSubtotal        Decimal  @db.Decimal(18, 2)
+  lineTotal           Decimal  @db.Decimal(18, 2)
+  note                String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  order     Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
+  unit      Unit                @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  modifiers OrderItemModifier[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model OrderItemModifier {
+  id                   String  @id @default(cuid())
+  orderItemId          String
+  modifierOptionId     String
+  modifierGroupName    String
+  modifierOptionName   String
+  priceDelta           Decimal @db.Decimal(18, 2)
+
+  orderItem      OrderItem      @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  modifierOption ModifierOption @relation(fields: [modifierOptionId], references: [id], onDelete: Restrict)
+
+  @@index([orderItemId])
+  @@map("order_item_modifiers")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  tenantId    String
+  orderId     String
+  method      PaymentMethod
+  status      PaymentStatus @default(COMPLETED)
+  amount      Decimal       @db.Decimal(18, 2)
+  reference   String?
+  createdAt   DateTime      @default(now())
+  reversedAt  DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, orderId])
+  @@index([reference])
+  @@map("payments")
+}
+
+model SaleCompletion {
+  orderId        String   @id
+  tenantId       String
+  idempotencyKey String
+  receiptNumber  String
+  completedById  String
+  createdAt      DateTime @default(now())
+
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  completedBy User   @relation("SaleCompletedBy", fields: [completedById], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, receiptNumber])
+  @@map("sale_completions")
+}
+
+model VoidRequest {
+  id           String            @id @default(cuid())
+  tenantId     String
+  orderId      String            @unique
+  requestedById String
+  approvedById  String?
+  status       VoidRequestStatus @default(PENDING)
+  reason       String
+  decisionNote String?
+  requestedAt  DateTime          @default(now())
+  decidedAt    DateTime?
+
+  tenant      Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  requestedBy User   @relation("VoidRequestedBy", fields: [requestedById], references: [id], onDelete: Restrict)
+  approvedBy  User?  @relation("VoidApprovedBy", fields: [approvedById], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, status])
+  @@map("void_requests")
+}

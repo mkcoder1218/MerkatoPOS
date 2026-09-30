@@ -14,6 +14,11 @@ model User {
   sessions          Session[]
   devicesRegistered Device[]        @relation("DeviceRegisteredBy")
   stockMovements    StockMovement[]
+  shifts            Shift[]
+  orders            Order[]
+  salesCompleted    SaleCompletion[] @relation("SaleCompletedBy")
+  voidRequests      VoidRequest[]    @relation("VoidRequestedBy")
+  voidApprovals     VoidRequest[]    @relation("VoidApprovedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])

@@ -11,10 +11,15 @@ import { DiscountsModule } from '../modules/discounts/discounts.module';
 import { HealthModule } from '../modules/health/health.module';
 import { InventoryModule } from '../modules/inventory/inventory.module';
 import { ModifiersModule } from '../modules/modifiers/modifiers.module';
+import { OrdersModule } from '../modules/orders/orders.module';
+import { PaymentsModule } from '../modules/payments/payments.module';
 import { PermissionsModule } from '../modules/permissions/permissions.module';
+import { PosSettingsModule } from '../modules/pos-settings/pos-settings.module';
 import { ProductsModule } from '../modules/products/products.module';
 import { RegistersModule } from '../modules/registers/registers.module';
 import { RolesModule } from '../modules/roles/roles.module';
+import { ShiftsModule } from '../modules/shifts/shifts.module';
+import { TablesModule } from '../modules/tables/tables.module';
 import { TaxesModule } from '../modules/taxes/taxes.module';
 import { TenantsModule } from '../modules/tenants/tenants.module';
 import { UnitsModule } from '../modules/units/units.module';
@@ -41,6 +46,11 @@ import { UsersModule } from '../modules/users/users.module';
     ModifiersModule,
     DiscountsModule,
     InventoryModule,
+    PosSettingsModule,
+    ShiftsModule,
+    TablesModule,
+    OrdersModule,
+    PaymentsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

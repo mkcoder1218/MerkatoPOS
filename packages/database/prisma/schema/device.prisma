@@ -48,6 +48,8 @@ model Register {
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
   branch Branch @relation(fields: [branchId], references: [id], onDelete: Restrict)
   device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  shifts Shift[]
+  orders Order[]
 
   @@unique([tenantId, code])
   @@index([tenantId, branchId])

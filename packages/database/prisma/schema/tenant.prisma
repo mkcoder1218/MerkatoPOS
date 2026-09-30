@@ -21,6 +21,13 @@ model Tenant {
   productDiscounts  ProductDiscount[]
   inventoryItems    InventoryItem[]
   stockMovements    StockMovement[]
+  posSettings       PosSettings?
+  shifts            Shift[]
+  diningTables      DiningTable[]
+  orders            Order[]
+  payments          Payment[]
+  saleCompletions   SaleCompletion[]
+  voidRequests      VoidRequest[]
 
   @@map("tenants")
 }
@@ -41,6 +48,9 @@ model Branch {
   products       ProductBranch[]
   inventoryItems InventoryItem[]
   stockMovements StockMovement[]
+  shifts         Shift[]
+  diningTables   DiningTable[]
+  orders         Order[]
 
   @@unique([tenantId, name])
   @@unique([tenantId, code])

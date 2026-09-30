@@ -27,6 +27,18 @@ export const PERMISSIONS = {
   DISCOUNTS_MANAGE: 'discounts.manage',
   INVENTORY_VIEW: 'inventory.view',
   INVENTORY_ADJUST: 'inventory.adjust',
+  SHIFTS_VIEW: 'shifts.view',
+  SHIFTS_OPEN: 'shifts.open',
+  SHIFTS_CLOSE: 'shifts.close',
+  TABLES_VIEW: 'tables.view',
+  TABLES_MANAGE: 'tables.manage',
+  ORDERS_VIEW: 'orders.view',
+  ORDERS_CREATE: 'orders.create',
+  ORDERS_UPDATE: 'orders.update',
+  SALES_COMPLETE: 'sales.complete',
+  SALES_VOID: 'sales.void',
+  SALES_VOID_APPROVE: 'sales.void.approve',
+  PAYMENTS_VIEW: 'payments.view',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

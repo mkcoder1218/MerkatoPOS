@@ -35,6 +35,7 @@ model Unit {
   inventoryItems  InventoryItem[]
   fromConversions UnitConversion[] @relation("FromUnit")
   toConversions   UnitConversion[] @relation("ToUnit")
+  orderItems      OrderItem[]
 
   @@unique([tenantId, name])
   @@unique([tenantId, symbol])
@@ -95,14 +96,15 @@ model Product {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  category      Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  unit          Unit                   @relation(fields: [unitId], references: [id], onDelete: Restrict)
-  taxProfile    TaxProfile?            @relation(fields: [taxProfileId], references: [id], onDelete: SetNull)
-  branches      ProductBranch[]
+  tenant         Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category       Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  unit           Unit                   @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  taxProfile     TaxProfile?            @relation(fields: [taxProfileId], references: [id], onDelete: SetNull)
+  branches       ProductBranch[]
   modifierGroups ProductModifierGroup[]
-  discounts     ProductDiscount[]
+  discounts      ProductDiscount[]
   inventoryItems InventoryItem[]
+  orderItems     OrderItem[]
 
   @@unique([tenantId, sku])
   @@unique([tenantId, barcode])
