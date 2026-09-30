@@ -20,7 +20,9 @@
     "db:validate": "prisma validate --schema packages/database/prisma/schema",
     "db:migrate": "prisma migrate dev --schema packages/database/prisma/schema",
     "db:migrate:deploy": "prisma migrate deploy --schema packages/database/prisma/schema",
-    "db:seed": "tsx packages/database/prisma/seed.ts"
+    "db:seed": "tsx packages/database/prisma/seed.ts",
+    "setup:local": "node scripts/setup-local-env.mjs",
+    "setup:local:db": "pnpm setup:local && pnpm db:generate && pnpm db:migrate:deploy && pnpm db:seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

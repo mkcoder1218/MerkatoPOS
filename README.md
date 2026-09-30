@@ -29,17 +29,23 @@ Configurable multi-tenant POS and business-management platform.
 
 ## Local setup
 
+Start PostgreSQL first, then run:
+
 ```bash
-cp .env.example .env
-docker compose up -d postgres
 pnpm install
-pnpm db:generate
-pnpm db:migrate:deploy
-pnpm db:seed
+pnpm setup:local:db
 pnpm dev
 ```
 
-Set a strong `JWT_ACCESS_SECRET` and all `SEED_*` values before seeding.
+`pnpm setup:local` creates an untracked local `.env` only when one does not already exist. It generates a random JWT secret and local demo seed credentials.
+
+Default local demo login created by the setup command:
+
+- tenant slug: `local-demo`
+- email: `admin@local.test`
+- password: `ChangeMe123!`
+
+These credentials are for local development only. Change them before using a shared or deployed environment.
 
 ## Validation
 
