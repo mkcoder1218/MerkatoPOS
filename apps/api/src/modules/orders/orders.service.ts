@@ -3,12 +3,14 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import Decimal from 'decimal.js';
 import type { JwtPayload } from '../auth/auth.types';
+import { PrintPayloadService } from '../print-jobs/print-payload.service';
 import type {
   CompleteSaleDto,
   CreateOrderDto,
@@ -22,10 +24,13 @@ import { SalesRepository } from './sales.repository';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly repository: OrdersRepository,
     private readonly pricing: PricingService,
     private readonly sales: SalesRepository,
+    private readonly printPayload: PrintPayloadService,
   ) {}
 
   list(user: JwtPayload) {
@@ -88,6 +93,7 @@ export class OrdersService {
     const type = dto.type ?? order.type;
     const tableId =
       dto.tableId !== undefined ? dto.tableId || undefined : order.tableId ?? undefined;
+
     await this.validateTable(
       user.tenantId,
       order.branchId,
@@ -121,6 +127,7 @@ export class OrdersService {
     const idempotencyKey = dto.idempotencyKey.trim();
     const existing = await this.sales.findCompletion(user.tenantId, idempotencyKey);
     if (existing) {
+      await this.queuePrintsSafely(user.tenantId, existing.order.id);
       return existing.order;
     }
 
@@ -158,19 +165,25 @@ export class OrdersService {
     }
 
     try {
-      return await this.sales.complete({
+      const completed = await this.sales.complete({
         tenantId: user.tenantId,
         branchId: order.branchId,
         orderId: order.id,
         userId: user.userId,
         idempotencyKey,
-        receiptNumber: 'RCP-' + Date.now() + '-' + randomUUID().slice(0, 8).toUpperCase(),
+        receiptNumber:
+          'RCP-' + Date.now() + '-' + randomUUID().slice(0, 8).toUpperCase(),
         payments: dto.payments.map((payment) => ({
           method: payment.method,
           amount: payment.amount,
           ...(payment.reference ? { reference: payment.reference.trim() } : {}),
         })),
       });
+
+      if (completed?.id) {
+        await this.queuePrintsSafely(user.tenantId, completed.id);
+      }
+      return completed;
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -178,6 +191,7 @@ export class OrdersService {
       ) {
         const raced = await this.sales.findCompletion(user.tenantId, idempotencyKey);
         if (raced) {
+          await this.queuePrintsSafely(user.tenantId, raced.order.id);
           return raced.order;
         }
       }
@@ -210,7 +224,9 @@ export class OrdersService {
   async approveVoid(user: JwtPayload, orderId: string, dto: DecideVoidDto) {
     const order = await this.getAccessibleOrder(user, orderId);
     if (order.voidRequest?.requestedById === user.userId) {
-      throw new ForbiddenException('Void approval must be performed by another authorized user');
+      throw new ForbiddenException(
+        'Void approval must be performed by another authorized user',
+      );
     }
     return this.sales.approveVoid(
       user.tenantId,
@@ -230,13 +246,28 @@ export class OrdersService {
     );
   }
 
+  private async queuePrintsSafely(tenantId: string, orderId: string): Promise<void> {
+    try {
+      await this.printPayload.queueCompletedSale(tenantId, orderId);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown queue error';
+      this.logger.error(
+        'Sale ' + orderId + ' completed but print jobs could not be queued: ' + message,
+      );
+    }
+  }
+
   private async priceItems(
     tenantId: string,
     branchId: string,
     inputs: CreateOrderDto['items'],
   ) {
     const productIds = [...new Set(inputs.map((item) => item.productId))];
-    const products = await this.repository.getPricingProducts(tenantId, branchId, productIds);
+    const products = await this.repository.getPricingProducts(
+      tenantId,
+      branchId,
+      productIds,
+    );
     if (products.length !== productIds.length) {
       throw new BadRequestException('One or more products are invalid');
     }

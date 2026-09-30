@@ -14,7 +14,8 @@ model Category {
   updatedAt   DateTime @updatedAt
 
   tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  products Product[]
+  products      Product[]
+  kitchenRoutes KitchenPrintRoute[]
 
   @@unique([tenantId, name])
   @@index([tenantId, displayOrder])
@@ -105,6 +106,7 @@ model Product {
   discounts      ProductDiscount[]
   inventoryItems InventoryItem[]
   orderItems     OrderItem[]
+  kitchenRoutes  KitchenPrintRoute[]
 
   @@unique([tenantId, sku])
   @@unique([tenantId, barcode])

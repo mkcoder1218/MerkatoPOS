@@ -50,6 +50,7 @@ model Register {
   device Device? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
   shifts Shift[]
   orders Order[]
+  receiptPrinter RegisterReceiptPrinter?
 
   @@unique([tenantId, code])
   @@index([tenantId, branchId])

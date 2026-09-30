@@ -15,6 +15,8 @@ import { OrdersModule } from '../modules/orders/orders.module';
 import { PaymentsModule } from '../modules/payments/payments.module';
 import { PermissionsModule } from '../modules/permissions/permissions.module';
 import { PosSettingsModule } from '../modules/pos-settings/pos-settings.module';
+import { PrintJobsModule } from '../modules/print-jobs/print-jobs.module';
+import { PrintersModule } from '../modules/printers/printers.module';
 import { ProductsModule } from '../modules/products/products.module';
 import { RegistersModule } from '../modules/registers/registers.module';
 import { RolesModule } from '../modules/roles/roles.module';
@@ -51,6 +53,8 @@ import { UsersModule } from '../modules/users/users.module';
     TablesModule,
     OrdersModule,
     PaymentsModule,
+    PrintersModule,
+    PrintJobsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

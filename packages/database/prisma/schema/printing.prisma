@@ -1,0 +1,121 @@
+enum PrinterType {
+  RECEIPT
+  KITCHEN
+  LABEL
+}
+
+enum PrinterInterface {
+  USB
+  NETWORK
+  SYSTEM
+}
+
+enum PrintJobKind {
+  RECEIPT
+  KITCHEN
+  LABEL
+}
+
+enum PrintJobStatus {
+  QUEUED
+  PRINTING
+  PRINTED
+  FAILED
+  RETRYING
+}
+
+model Printer {
+  id             String           @id @default(cuid())
+  tenantId       String
+  branchId       String
+  name           String
+  type           PrinterType
+  interface      PrinterInterface
+  connectionData Json?
+  isDefault      Boolean          @default(false)
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  tenant           Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch           Branch                   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  receiptRegisters RegisterReceiptPrinter[]
+  kitchenRoutes    KitchenPrintRoute[]
+  jobs             PrintJob[]
+
+  @@unique([tenantId, branchId, name])
+  @@index([tenantId, branchId, type])
+  @@map("printers")
+}
+
+model RegisterReceiptPrinter {
+  registerId String   @id
+  printerId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  register Register @relation(fields: [registerId], references: [id], onDelete: Cascade)
+  printer  Printer  @relation(fields: [printerId], references: [id], onDelete: Cascade)
+
+  @@index([printerId])
+  @@map("register_receipt_printers")
+}
+
+model KitchenPrintRoute {
+  id         String   @id @default(cuid())
+  tenantId   String
+  branchId   String
+  printerId  String
+  categoryId String?
+  productId  String?
+  priority   Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch   Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  printer  Printer   @relation(fields: [printerId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  product  Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, branchId, priority])
+  @@index([categoryId])
+  @@index([productId])
+  @@map("kitchen_print_routes")
+}
+
+model PrintJob {
+  id            String         @id @default(cuid())
+  tenantId      String
+  branchId      String
+  printerId     String
+  orderId       String?
+  kind          PrintJobKind
+  status        PrintJobStatus @default(QUEUED)
+  payload       Json
+  sourceKey     String?        @unique
+  attemptCount  Int            @default(0)
+  maxAttempts   Int            @default(5)
+  claimedAt     DateTime?
+  printedAt     DateTime?
+  failedAt      DateTime?
+  lastError     String?
+  requestedById String?
+  reprintOfId   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  tenant      Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branch      Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  printer     Printer    @relation(fields: [printerId], references: [id], onDelete: Restrict)
+  order       Order?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  requestedBy User?      @relation("PrintRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  reprintOf   PrintJob?  @relation("PrintJobReprints", fields: [reprintOfId], references: [id], onDelete: SetNull)
+  reprints    PrintJob[] @relation("PrintJobReprints")
+
+  @@index([tenantId, branchId, status, createdAt])
+  @@index([printerId, status, createdAt])
+  @@index([orderId])
+  @@map("print_jobs")
+}

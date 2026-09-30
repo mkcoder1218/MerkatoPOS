@@ -127,6 +127,7 @@ model Order {
   payments    Payment[]
   completion  SaleCompletion?
   voidRequest VoidRequest?
+  printJobs   PrintJob[]
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, branchId, status, createdAt])

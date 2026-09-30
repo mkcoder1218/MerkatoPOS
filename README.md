@@ -11,22 +11,21 @@ Configurable multi-tenant POS and business-management platform.
 
 ## Implemented foundation
 
-- tenant-aware authentication and rotating sessions
-- branches, users, roles, permissions
-- devices and POS registers
-- categories, units, tax profiles, products, modifiers, discounts
-- branch-scoped inventory and auditable stock movements
-- configurable POS settings
-- shift opening/closing with cash reconciliation
-- optional branch tables with occupancy derived from open orders
-- server-side POS pricing snapshots
-- dine-in, takeaway, pickup, and delivery orders
-- CASH, Bank Transfer, Telebirr, and Chapa payments
-- idempotent atomic sale finalization
-- inventory deduction during checkout
-- receipt numbering
-- permission-based void request/approval
-- void stock reversal and payment reversal
+- tenant-aware authentication, branches, users, roles, and permissions
+- devices, POS registers, shifts, and optional tables
+- categories, units, taxes, products, modifiers, discounts, and inventory
+- server-priced orders and atomic idempotent checkout
+- CASH, Bank Transfer, Telebirr, and Chapa payment records
+- void approval with stock/payment reversal
+- receipt, kitchen, and label printer configuration
+- register receipt-printer assignment and branch default printers
+- product/category kitchen routing
+- immutable receipt and kitchen-ticket payload snapshots
+- queued/printing/printed/failed/retrying print-job lifecycle
+- local print-agent claim/acknowledge/fail contract
+- automatic retry state and permission-controlled manual retry
+- auditable reprint jobs that never alter sale state
+- print failures isolated from completed financial transactions
 
 ## Local setup
 
@@ -48,22 +47,21 @@ Set a strong `JWT_ACCESS_SECRET` and all `SEED_*` values before seeding.
 pnpm validate
 ```
 
-This generates Prisma Client and runs Prisma validation, TypeScript typechecking, linting, tests, and builds.
+## Printing API
 
-## Selling workflow API
+- `GET|POST /api/v1/printers`
+- `PATCH /api/v1/printers/:printerId`
+- `PUT /api/v1/printers/receipt-assignment`
+- `GET /api/v1/printers/kitchen-routes/list`
+- `POST /api/v1/printers/kitchen-routes`
+- `PATCH /api/v1/printers/kitchen-routes/:routeId`
+- `GET /api/v1/print-jobs`
+- `POST /api/v1/print-jobs/claim`
+- `POST /api/v1/print-jobs/:jobId/printed`
+- `POST /api/v1/print-jobs/:jobId/failed`
+- `POST /api/v1/print-jobs/:jobId/retry`
+- `POST /api/v1/print-jobs/:jobId/reprint`
 
-- `GET|PATCH /api/v1/pos-settings`
-- `GET /api/v1/shifts`
-- `POST /api/v1/shifts/open`
-- `POST /api/v1/shifts/:shiftId/close`
-- `GET|POST /api/v1/tables`
-- `PATCH /api/v1/tables/:tableId`
-- `GET|POST /api/v1/orders`
-- `GET|PATCH /api/v1/orders/:orderId`
-- `POST /api/v1/orders/:orderId/complete`
-- `POST /api/v1/orders/:orderId/void-request`
-- `POST /api/v1/orders/:orderId/void-approve`
-- `POST /api/v1/orders/:orderId/void-reject`
-- `GET /api/v1/payments`
+The local print service authenticates as a user/service identity with `print_agent.process`, claims jobs for a configured printer, prints the returned payload, then acknowledges success or failure.
 
 See `DEVELOPMENT_INSTRUCTIONS.md` and `CODING_RULES.md` before architectural changes.

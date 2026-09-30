@@ -28,6 +28,9 @@ model Tenant {
   payments          Payment[]
   saleCompletions   SaleCompletion[]
   voidRequests      VoidRequest[]
+  printers          Printer[]
+  kitchenRoutes     KitchenPrintRoute[]
+  printJobs         PrintJob[]
 
   @@map("tenants")
 }
@@ -51,6 +54,9 @@ model Branch {
   shifts         Shift[]
   diningTables   DiningTable[]
   orders         Order[]
+  printers       Printer[]
+  kitchenRoutes  KitchenPrintRoute[]
+  printJobs      PrintJob[]
 
   @@unique([tenantId, name])
   @@unique([tenantId, code])

@@ -39,6 +39,11 @@ export const PERMISSIONS = {
   SALES_VOID: 'sales.void',
   SALES_VOID_APPROVE: 'sales.void.approve',
   PAYMENTS_VIEW: 'payments.view',
+  PRINTERS_VIEW: 'printers.view',
+  PRINTERS_MANAGE: 'printers.manage',
+  PRINT_JOBS_VIEW: 'print_jobs.view',
+  PRINT_JOBS_REPRINT: 'print_jobs.reprint',
+  PRINT_AGENT: 'print_agent.process',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

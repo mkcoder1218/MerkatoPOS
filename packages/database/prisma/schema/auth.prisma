@@ -19,6 +19,7 @@ model User {
   salesCompleted    SaleCompletion[] @relation("SaleCompletedBy")
   voidRequests      VoidRequest[]    @relation("VoidRequestedBy")
   voidApprovals     VoidRequest[]    @relation("VoidApprovedBy")
+  printJobsRequested PrintJob[]       @relation("PrintRequestedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
